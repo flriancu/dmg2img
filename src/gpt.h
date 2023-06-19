@@ -1,3 +1,5 @@
+#include "platform.h"
+
 #define GPT_HDR_SIG "EFI PART"
 #define GPT_HDR_REVISION 0x00010000
 
@@ -30,14 +32,14 @@ struct _guid {
 	uint8_t clock_seq_hi_and_reserved;
 	uint8_t clock_seq_low;
 	uint8_t node[6];
-}     __attribute__((__packed__));
+} ATTRIBUTE_PACKED;
 
 struct _gpt_header {
 	char hdr_sig[8];
 	uint32_t hdr_revision;
 	uint32_t hdr_size;
 	uint32_t hdr_crc_self;
-	uint32_t __reserved;
+	uint32_t RESERVED_FIELD_NAME;
 	uint64_t hdr_lba_self;
 	uint64_t hdr_lba_backup;
 	uint64_t hdr_lba_start;
@@ -48,7 +50,7 @@ struct _gpt_header {
 	uint32_t hdr_entsz;
 	uint32_t hdr_crc_table;
 	uint32_t padding;
-}           __attribute__((__packed__));
+} ATTRIBUTE_PACKED;
 
 struct _gpt_entry {
 	struct _guid ent_type;
@@ -57,4 +59,4 @@ struct _gpt_entry {
 	uint64_t ent_lba_end;
 	uint64_t ent_attr;
 	uint16_t name[36];	/* UTF-16 */
-}          __attribute__((__packed__));
+} ATTRIBUTE_PACKED;

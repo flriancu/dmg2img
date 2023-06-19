@@ -18,7 +18,7 @@
 #include <zlib.h>
 #include <bzlib.h>
 #include "adc.h"
-#include <unistd.h>
+#include "platform.h"
 
 #define BT_ADC   0x80000004
 #define BT_ZLIB  0x80000005
@@ -122,7 +122,7 @@ struct _kolyblk {
 	uint32_t ImageVariant;
 	uint64_t SectorCount;
 	char Reserved8[12];
-} __attribute__ ((__packed__));
+} ATTRIBUTE_PACKED;
 struct _kolyblk kolyblk;
 
 
@@ -142,7 +142,7 @@ struct _mishblk {
 	char Reserved4[120];
 	uint32_t BlocksRunCount;
 	char *Data;
-} __attribute__ ((__packed__));
+} ATTRIBUTE_PACKED;
 
 
 void read_kolyblk(FILE* F, struct _kolyblk* k)

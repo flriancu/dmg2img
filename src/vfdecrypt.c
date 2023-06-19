@@ -33,13 +33,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <inttypes.h>
-#include <arpa/inet.h>
 #include <openssl/sha.h>
 #include <openssl/aes.h>
 #include <openssl/hmac.h>
 #include <openssl/evp.h>
+
+#if defined(_WIN32)
+#   include <winsock.h>
+#else
+#   include <arpa/inet.h>
+#endif
+
+#if defined(_WIN32)
+#   include "getopt.h"
+#else
+#   include <unistd.h>
+#endif
 
 #define OSSwapHostToBigInt32(x) ntohl(x)
 
@@ -185,7 +195,6 @@ void adjust_v2_header_byteorder(cencrypted_v2_pwheader *pwhdr) {
 
 HMAC_CTX *hmacsha1_ctx;
 AES_KEY aes_decrypt_key;
-int CHUNK_SIZE=4096;  // default
 
 /**
  *  * Compute IV of current block as
@@ -202,11 +211,11 @@ void compute_iv(uint32_t chunk_no, uint8_t *iv) {
   memcpy(iv, mdResult, CIPHER_BLOCKSIZE);
 }
 
-void decrypt_chunk(uint8_t *ctext, uint8_t *ptext, uint32_t chunk_no) {
+void decrypt_chunk(uint8_t *ctext, uint8_t *ptext, uint32_t chunk_no, uint32_t chunk_size) {
   uint8_t iv[CIPHER_BLOCKSIZE];
 
   compute_iv(chunk_no, iv);
-  AES_cbc_encrypt(ctext, ptext, CHUNK_SIZE, &aes_decrypt_key, iv, AES_DECRYPT);
+  AES_cbc_encrypt(ctext, ptext, chunk_size, &aes_decrypt_key, iv, AES_DECRYPT);
 }
 
 /* DES3-EDE unwrap operation loosely based on to RFC 2630, section 12.6 
@@ -359,13 +368,16 @@ int usage(char *message) {
   exit(1);
 }
 
+#define CHUNK_SIZE_DEFAULT (4096)
+
 int main(int argc, char *argv[]) {
   FILE *in, *out;
   cencrypted_v1_header v1header;
   cencrypted_v2_pwheader v2header;
   
-  uint8_t hmacsha1_key[20], aes_key[16], inbuf[CHUNK_SIZE], outbuf[CHUNK_SIZE];
+  uint8_t hmacsha1_key[20], aes_key[16], inbuf[CHUNK_SIZE_DEFAULT], outbuf[CHUNK_SIZE_DEFAULT];
   uint32_t chunk_no;
+  int chunk_size = CHUNK_SIZE_DEFAULT;
   int hdr_version, c, optError = 0;
   char inFile[512], outFile[512], passphrase[512], cmd[640];
   int iflag = 0, oflag = 0, pflag = 0, kflag = 0, verbose = 0;
@@ -481,7 +493,7 @@ int main(int argc, char *argv[]) {
     adjust_v2_header_byteorder(&v2header);
     dump_v2_header(&v2header);
     if(!kflag) unwrap_v2_header(passphrase, &v2header, aes_key, hmacsha1_key);
-    CHUNK_SIZE = v2header.blocksize;
+    chunk_size = v2header.blocksize;
   }
   
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
@@ -512,14 +524,14 @@ int main(int argc, char *argv[]) {
   else fseek(in, 0L, SEEK_SET);
   
   chunk_no = 0;
-  while(fread(inbuf, CHUNK_SIZE, 1, in) > 0) {
-    decrypt_chunk(inbuf, outbuf, chunk_no);
+  while(fread(inbuf, chunk_size, 1, in) > 0) {
+    decrypt_chunk(inbuf, outbuf, chunk_no, chunk_size);
     chunk_no++;
-    if(hdr_version == 2 && (v2header.datasize-ftell(out)) < CHUNK_SIZE) {
+    if(hdr_version == 2 && (v2header.datasize-ftell(out)) < chunk_size) {
       fwrite(outbuf, v2header.datasize - ftell(out), 1, out);
       break;
     }
-    fwrite(outbuf, CHUNK_SIZE, 1, out);
+    fwrite(outbuf, chunk_size, 1, out);
   }
   
   if (verbose)  fprintf(stderr, "%"PRIX32" chunks written\n", chunk_no);

@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <unistd.h>
+//#include <unistd.h>
 
 #define ADC_PLAIN 0x01
 #define ADC_2BYTE 0x02

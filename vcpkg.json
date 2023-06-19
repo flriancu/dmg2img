@@ -1,0 +1,8 @@
+{
+  "dependencies": [
+    "zlib",
+    "bzip2",
+    "openssl",
+    "lzfse"
+  ]
+}
