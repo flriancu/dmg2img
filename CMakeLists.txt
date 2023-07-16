@@ -1,12 +1,28 @@
 cmake_minimum_required(VERSION 3.20)
 
+if (WIN32)
+    if (NOT DEFINED VCPKG_ROOT)
+        set(VCPKG_ROOT "$ENV{userprofile}/vcpkg")
+    endif()
+    set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
+endif()
+
 project(dmg2img C)
 
 option(HAVE_LZFSE "HAVE_LZFSE" OFF)
 
+if (WIN32)
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+    set(VCPKG_PACKAGES_DIR "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}")
+endif()
+
 find_package(ZLIB REQUIRED)
 find_package(BZip2 REQUIRED)
 find_package(OpenSSL REQUIRED)
+
+if (HAVE_LZFSE)
+    find_package(Lzfse REQUIRED)
+endif()
 
 #-------------------------------------------------------------------------------
 #   dmg2img
@@ -34,6 +50,10 @@ target_link_libraries(dmg2img PRIVATE
 if (HAVE_LZFSE)
     target_compile_definitions(dmg2img PRIVATE
         HAVE_LZFSE
+    )
+
+    target_link_libraries(dmg2img PRIVATE
+        Lzfse::Lzfse
     )
 endif()
 

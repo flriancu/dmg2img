@@ -1,51 +1,63 @@
-# DMG2IMG
+# dmg2img
 
-DMG2IMG is a tool which allows converting Apple compressed dmg
+## Introduction
+
+`dmg2img` is a tool which allows converting Apple compressed dmg
 archives to standard (hfsplus) image disk files.
 
-This tool handles zlib, bzip2, and LZFSE compressed dmg images.
-
-
-Usage:
-
-    dmg2img [-l] [-p N] [-s] [-v] [-V] [-d] <input.dmg> [<output.img> | -]
-
-or
-
-    dmg2img [-l] [-p N] [-s] [-v] [-V] [-d] -i <input.dmg> -o <output.img | ->
-
-    Options: -s (silent) -v (verbose) -V (extremely verbose) -d (debug)
-             -l (list partitions) -p N (extract only partition N)
-
-
-See the original [README](README) file for platform-specific instructions to
-open or mount the resulting output file.
+This tool handles zlib, bzip2, and LZFSE compressed DMG images.
 
 The original author is vu1tur, <http://vu1tur.eu.org/dmg2img>. This Git
 repository is maintained by Peter Wu at <https://github.com/Lekensteyn/dmg2img>
 based on imported tarballs. It includes bug and security fixes and further
 enhancements.
 
+
+## Usage
+
+See the [USAGE.md](USAGE.md) file for usage and platform-specific instructions to
+open or mount the resulting output file.
+
+
 ## Building
 
-Required packages:
+### Windows
 
- - zlib1g-dev (zlib support)
- - libbz2-dev (bzip2 support)
- - libssl-dev (only required for vfdecrypt, not needed for dmg2img)
+The Windows build requires vcpkg, which you can install as follows:
 
-LZFSE decompression support requires the LZFSE library which can be found at
+    git clone https://github.com/microsoft/vcpkg
+    .\vcpkg\bootstrap-vcpkg.bat
+
+You can then build the application as follows:
+
+    cmake -S . -B build-windows -D VCPKG_ROOT=<...>
+    cmake --build build-windows --config Release
+
+You can skip `-D VCPKG_ROOT=<...>` if vcpkg is installed in `%userprofile%` .
+
+
+### Linux
+
+Install the following dependencies:
+
+    libssl-dev zlib1g-dev libbz2-dev
+
+You can then build the application as follows:
+
+    cmake -S . -B build-linux -D CMAKE_BUILD_TYPE=Release
+    cmake --build build-linux
+
+
+### Additional options
+
+-   LZFSE decompression support requires the LZFSE library which can be found at
 <https://github.com/lzfse/lzfse/>. As this library is not widely available on
 Linux distributions, it is not enabled by default.
 
-To build dmg2img:
+    To build the application with LZFSE support, add the following to the cmake generation step:
 
-    make dmg2img
+        -D HAVE_LZFSE=ON
 
-To build dmg2img with LZFSE support:
+-   To build the application with Address Sanitizer for debugging purposes, add the following to the cmake generation step:
 
-    make dmg2img HAVE_LZFSE=1
-
-To build dmg2img with Address Sanitizer for debugging purposes:
-
-    make dmg2img CC=clang LDFLAGS=-fsanitize=address
+        -D CMAKE_C_COMPILER=clang -D HAVE_ASAN=ON

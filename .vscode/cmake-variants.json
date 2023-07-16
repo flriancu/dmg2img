@@ -1,0 +1,38 @@
+{
+    "buildType": {
+        "default": "Debug",
+        "choices": {
+            "Debug": {
+                "short": "Debug",
+                "long": "With debug information",
+                "buildType": "Debug"
+            },
+            "Release": {
+                "short": "Release",
+                "long": "Optimized for speed",
+                "buildType": "Release"
+            },
+            "RelWithDebInfo": {
+                "short": "RelWithDebInfo",
+                "long": "Optimized for speed with debug information",
+                "buildType": "RelWithDebInfo"
+            }
+        }
+    },
+    "lzfse": {
+        "default": "off",
+        "choices": {
+            "off": {
+                "short": "no-lzfse",
+                "long": "No lzfse"
+            },
+            "lzfse": {
+                "short": "lzfse",
+                "long": "With lzfse",
+                "settings": {
+                    "HAVE_LZFSE": "ON"
+                }
+            }
+        }
+    }
+}
