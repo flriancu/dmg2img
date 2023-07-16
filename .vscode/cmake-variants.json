@@ -46,7 +46,6 @@
                 "short": "asan",
                 "long": "With ASAN",
                 "settings": {
-                    "CMAKE_C_COMPILER": "clang",
                     "HAVE_ASAN": "ON"
                 }
             }
