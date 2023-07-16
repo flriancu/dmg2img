@@ -1,31 +1,46 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.22)
 
-if (WIN32)
-    if (NOT DEFINED VCPKG_ROOT)
+#-------------------------------------------------------------------------------
+#   vcpkg setup
+#-------------------------------------------------------------------------------
+
+if (NOT DEFINED VCPKG_ROOT)
+    if (WIN32)
         set(VCPKG_ROOT "$ENV{userprofile}/vcpkg")
+    else()
+        set(VCPKG_ROOT "$ENV{HOME}/vcpkg")
     endif()
-    set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
 endif()
+
+if (EXISTS "${VCPKG_ROOT}")
+    set(VCPKG_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
+
+    if (EXISTS "${VCPKG_TOOLCHAIN_FILE}")
+        set(CMAKE_TOOLCHAIN_FILE "${VCPKG_TOOLCHAIN_FILE}" CACHE STRING "")
+        message("-- Using vcpkg")
+    endif()
+endif()
+
+#-------------------------------------------------------------------------------
+#   project setup
+#-------------------------------------------------------------------------------
 
 project(dmg2img C)
 
 option(HAVE_LZFSE "HAVE_LZFSE" OFF)
-
-if (WIN32)
-    list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-    set(VCPKG_PACKAGES_DIR "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}")
-endif()
+option(HAVE_ASAN "HAVE_ASAN" OFF)
 
 find_package(ZLIB REQUIRED)
 find_package(BZip2 REQUIRED)
 find_package(OpenSSL REQUIRED)
 
 if (HAVE_LZFSE)
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
     find_package(Lzfse REQUIRED)
 endif()
 
 #-------------------------------------------------------------------------------
-#   dmg2img
+#   target dmg2img
 #-------------------------------------------------------------------------------
 
 add_executable(dmg2img)
@@ -47,6 +62,16 @@ target_link_libraries(dmg2img PRIVATE
     BZip2::BZip2
 )
 
+if (HAVE_ASAN)
+    target_compile_options(dmg2img PRIVATE
+        -fsanitize=address
+    )
+
+    target_link_options(dmg2img PRIVATE
+        -fsanitize=address
+    )
+endif()
+
 if (HAVE_LZFSE)
     target_compile_definitions(dmg2img PRIVATE
         HAVE_LZFSE
@@ -58,7 +83,7 @@ if (HAVE_LZFSE)
 endif()
 
 #-------------------------------------------------------------------------------
-#   vfdecrypt
+#   target vfdecrypt
 #-------------------------------------------------------------------------------
 
 add_executable(vfdecrypt)
@@ -71,6 +96,16 @@ target_sources(vfdecrypt PRIVATE
 target_link_libraries(vfdecrypt PRIVATE
     OpenSSL::Crypto
 )
+
+if (HAVE_ASAN)
+    target_compile_options(vfdecrypt PRIVATE
+        -fsanitize=address
+    )
+
+    target_link_options(vfdecrypt PRIVATE
+        -fsanitize=address
+    )
+endif()
 
 if (WIN32)
     target_sources(vfdecrypt PRIVATE

@@ -15,49 +15,75 @@ enhancements.
 
 ## Usage
 
-See the [USAGE.md](USAGE.md) file for usage and platform-specific instructions to
+See the [USAGE.txt](USAGE.txt) file for usage and platform-specific instructions to
 open or mount the resulting output file.
 
 
 ## Building
 
-### Windows
+### Windows and Linux via vcpkg
 
-The Windows build requires vcpkg, which you can install as follows:
-
+-   Get vcpkg:
+    ```
     git clone https://github.com/microsoft/vcpkg
-    .\vcpkg\bootstrap-vcpkg.bat
+    ```
 
-You can then build the application as follows:
+-   Install vcpkg:
+    -   Windows:
+        ```
+        .\vcpkg\bootstrap-vcpkg.bat
+        ```
+    -   Linux:
+        ```
+        ./vcpkg/bootstrap-vcpkg.sh
+        ```
 
-    cmake -S . -B build-windows -D VCPKG_ROOT=<...>
-    cmake --build build-windows --config Release
-
-You can skip `-D VCPKG_ROOT=<...>` if vcpkg is installed in `%userprofile%` .
+-   Build the project:
+    -   Windows:
+        ```
+        cmake -S . -B build-windows -D VCPKG_ROOT=<...>
+        cmake --build build-windows --config Release
+        ```
+        Note: you can skip `-D VCPKG_ROOT=<...>` if vcpkg is installed in `%userprofile%`
+    -   Linux:
+        ```
+        cmake -S . -B build-linux -D CMAKE_BUILD_TYPE=Release -D VCPKG_ROOT=<...>
+        cmake --build build-linux
+        ```
+        Note: you can skip `-D VCPKG_ROOT=<...>` if vcpkg is installed in `$HOME`
 
 
 ### Linux
 
-Install the following dependencies:
-
+-   Install the following dependencies:
+    ```
     libssl-dev zlib1g-dev libbz2-dev
+    ```
 
-You can then build the application as follows:
-
+-   Build the project:
+    ```
     cmake -S . -B build-linux -D CMAKE_BUILD_TYPE=Release
     cmake --build build-linux
+    ```
 
 
 ### Additional options
 
--   LZFSE decompression support requires the LZFSE library which can be found at
-<https://github.com/lzfse/lzfse/>. As this library is not widely available on
-Linux distributions, it is not enabled by default.
+-   LZFSE decompression support requires the lzfse library. To build the application with LZFSE support:
 
-    To build the application with LZFSE support, add the following to the cmake generation step:
-
+    -   If not using vcpkg, install the library manually:
+        ```
+        git clone https://github.com/lzfse/lzfse
+        cd lzfse
+        sudo make install
+        ```
+    -   Add the following to the cmake generation step:
+        ```
         -D HAVE_LZFSE=ON
+        ```
 
--   To build the application with Address Sanitizer for debugging purposes, add the following to the cmake generation step:
-
+-   To build the application with Address Sanitizer for debugging purposes:
+    -   Add the following to the cmake generation step:
+        ```
         -D CMAKE_C_COMPILER=clang -D HAVE_ASAN=ON
+        ```
