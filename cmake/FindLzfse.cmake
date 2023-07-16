@@ -8,34 +8,39 @@ if (NOT LZFSE_DIR)
 endif()
 
 find_path(Lzfse_INCLUDE_DIR
-    NAMES           lzfse.h
-    HINTS           ${LZFSE_DIR}
-    PATH_SUFFIXES   include
+    NAMES lzfse.h
+    HINTS ${LZFSE_DIR}
+    PATH_SUFFIXES include
 )
 
 find_library(Lzfse_LIBRARY
-    NAMES           lzfse.lib
-    HINTS           ${LZFSE_DIR}/lib
+    NAMES lzfse.lib
+    HINTS ${LZFSE_DIR}
+    PATH_SUFFIXES lib
     NO_DEFAULT_PATH
 )
 
 find_file(Lzfse_LIBRARY_SHARED
-    NAMES           lzfse.dll
-    HINTS           ${LZFSE_DIR}/bin
+    NAMES lzfse.dll
+    HINTS ${LZFSE_DIR}
+    PATH_SUFFIXES bin
     NO_DEFAULT_PATH
 )
 
 find_package_handle_standard_args(Lzfse
-    REQUIRED_VARS   Lzfse_INCLUDE_DIR Lzfse_LIBRARY Lzfse_LIBRARY_SHARED
+    REQUIRED_VARS Lzfse_INCLUDE_DIR Lzfse_LIBRARY Lzfse_LIBRARY_SHARED
 )
 
 if (Lzfse_FOUND)
     mark_as_advanced(Lzfse_INCLUDE_DIR)
     mark_as_advanced(Lzfse_LIBRARY)
+    mark_as_advanced(Lzfse_LIBRARY_SHARED)
 endif()
 
 if (Lzfse_FOUND AND NOT TARGET Lzfse::Lzfse)
-    add_library(Lzfse::Lzfse IMPORTED SHARED)
+    add_library(Lzfse::Lzfse
+        IMPORTED SHARED
+    )
 
     set_target_properties(Lzfse::Lzfse PROPERTIES
         IMPORTED_IMPLIB ${Lzfse_LIBRARY}
@@ -43,5 +48,6 @@ if (Lzfse_FOUND AND NOT TARGET Lzfse::Lzfse)
     )
 
     target_include_directories(Lzfse::Lzfse
-        INTERFACE ${Lzfse_INCLUDE_DIR})
+        INTERFACE ${Lzfse_INCLUDE_DIR}
+    )
 endif()
