@@ -43,7 +43,7 @@ endif()
 #   helper functions
 #-------------------------------------------------------------------------------
 
-function(prepare_asan target_name)
+function(target_prepare_asan target_name)
     target_compile_options(${target_name} PRIVATE
         -fsanitize=address
     )
@@ -91,7 +91,7 @@ target_link_libraries(dmg2img PRIVATE
 )
 
 if (HAVE_ASAN)
-    prepare_asan(dmg2img)
+    target_prepare_asan(dmg2img)
 endif()
 
 if (HAVE_LZFSE)
@@ -120,7 +120,7 @@ target_link_libraries(vfdecrypt PRIVATE
 )
 
 if (HAVE_ASAN)
-    prepare_asan(vfdecrypt)
+    target_prepare_asan(vfdecrypt)
 endif()
 
 if (WIN32)

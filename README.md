@@ -15,11 +15,26 @@ enhancements.
 
 ## Usage
 
-See the [USAGE.txt](USAGE.txt) file for usage and platform-specific instructions to
-open or mount the resulting output file.
+    dmg2img [-l] [-p N] [-s] [-v] [-V] [-d] <input.dmg> [<output.img>]
+    dmg2img -i <input.dmg> -o <output.img>
+
+### Notes
+
+-   An equivalent command under Mac OS X would be:
+
+        hdiutil convert <input.dmg> -format UDTO -o <output.img>
+
+-   Under Linux, the image disk file can be mounted with the commands:
+
+        modprobe hfsplus
+        mount -t hfsplus -o loop <output.img> /mnt
+
+-   Windows users can open the image disk file as follows:
+    -   For pre-10 versions, with UltraISO
+    -   For 10 and newer, directly
 
 
-## Building
+## Build
 
 ### Windows and Linux via vcpkg
 
