@@ -1,14 +1,5 @@
 # Changelog
 
-## [1.6.7] - 09 February 2017 - Peter Wu
-
--   Fixed buffer underrun
--   Avoid truncating .img file when run to list partition
-
-## [1.6.6] - 06 February 2017 - Peter Wu
-
--   Fixed a crash on invalid block signature
-
 ## [1.6.5] - 23 July 2013 - vu1tur
 
 -   Fixed a bug in handling some types of dmg files
