@@ -40,6 +40,34 @@ if (HAVE_LZFSE)
 endif()
 
 #-------------------------------------------------------------------------------
+#   helper functions
+#-------------------------------------------------------------------------------
+
+function(prepare_asan target_name)
+    target_compile_options(${target_name} PRIVATE
+        -fsanitize=address
+    )
+
+    if (WIN32)
+        target_link_libraries(${target_name} PRIVATE
+            clang_rt.asan-x86_64
+        )
+
+        target_compile_definitions(${target_name} PRIVATE
+            _CRT_SECURE_NO_WARNINGS
+        )
+
+        set_target_properties(${target_name} PROPERTIES
+            MSVC_RUNTIME_LIBRARY "MultiThreaded"
+        )
+    else()
+        target_link_options(${target_name} PRIVATE
+            -fsanitize=address
+        )
+    endif()
+endfunction()
+
+#-------------------------------------------------------------------------------
 #   target dmg2img
 #-------------------------------------------------------------------------------
 
@@ -63,13 +91,7 @@ target_link_libraries(dmg2img PRIVATE
 )
 
 if (HAVE_ASAN)
-    target_compile_options(dmg2img PRIVATE
-        -fsanitize=address
-    )
-
-    target_link_options(dmg2img PRIVATE
-        -fsanitize=address
-    )
+    prepare_asan(dmg2img)
 endif()
 
 if (HAVE_LZFSE)
@@ -98,13 +120,7 @@ target_link_libraries(vfdecrypt PRIVATE
 )
 
 if (HAVE_ASAN)
-    target_compile_options(vfdecrypt PRIVATE
-        -fsanitize=address
-    )
-
-    target_link_options(vfdecrypt PRIVATE
-        -fsanitize=address
-    )
+    prepare_asan(vfdecrypt)
 endif()
 
 if (WIN32)
